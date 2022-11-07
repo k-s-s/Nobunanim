@@ -26,6 +26,7 @@ public class Nobunanim : ModuleRules
 			{
 				"Core",
                 "AnimGraphRuntime",
+                "DeveloperSettings"
 				// ... add other public dependencies that you statically link with here ...
 			}
             );

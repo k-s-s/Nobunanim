@@ -23,16 +23,17 @@ public:
 
 	/** IAnimNodeEditMode interface */
 	virtual ECoordSystem GetWidgetCoordinateSystem() const override;
-	virtual FWidget::EWidgetMode GetWidgetMode() const override;
-	virtual FWidget::EWidgetMode ChangeToNextWidgetMode(FWidget::EWidgetMode CurWidgetMode) override;
-	virtual bool SetWidgetMode(FWidget::EWidgetMode InWidgetMode) override;
+	virtual UE::Widget::EWidgetMode GetWidgetMode() const override;
+	virtual UE::Widget::EWidgetMode ChangeToNextWidgetMode(UE::Widget::EWidgetMode CurWidgetMode) override;
+	virtual bool SetWidgetMode(UE::Widget::EWidgetMode InWidgetMode) override;
 	virtual FName GetSelectedBone() const override;
 	virtual void DoTranslation(FVector& InTranslation) override;
 	virtual void DoRotation(FRotator& InRotation) override;
 	virtual void DoScale(FVector& InScale) override;
 	virtual void EnterMode(class UAnimGraphNode_Base* InEditorNode, struct FAnimNode_Base* InRuntimeNode) override;
 	virtual void ExitMode() override;
-
+	virtual bool SupportsPoseWatch() override { return false; }
+	virtual void RegisterPoseWatchedNode(UAnimGraphNode_Base* InEditorNode, FAnimNode_Base* InRuntimeNode) override { }
 	/** IPersonaEditMode interface */
 	virtual bool GetCameraTarget(FSphere& OutTarget) const override;
 	virtual class IPersonaPreviewScene& GetAnimPreviewScene() const override;

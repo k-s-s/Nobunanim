@@ -56,33 +56,33 @@ ECoordSystem FNobunanimBaseEditMode::GetWidgetCoordinateSystem() const
 	return ECoordSystem::COORD_None;
 }
 
-FWidget::EWidgetMode FNobunanimBaseEditMode::GetWidgetMode() const
+UE::Widget::EWidgetMode FNobunanimBaseEditMode::GetWidgetMode() const
 {
 	UAnimGraphNode_SkeletalControlBase* SkelControl = Cast<UAnimGraphNode_SkeletalControlBase>(AnimNode);
 	if (SkelControl != nullptr)
 	{
 		PRAGMA_DISABLE_DEPRECATION_WARNINGS
-			return (FWidget::EWidgetMode)SkelControl->GetWidgetMode(GetAnimPreviewScene().GetPreviewMeshComponent());
+			return (UE::Widget::EWidgetMode)SkelControl->GetWidgetMode(GetAnimPreviewScene().GetPreviewMeshComponent());
 		PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	}
 
-	return FWidget::EWidgetMode::WM_None;
+	return UE::Widget::EWidgetMode::WM_None;
 }
 
-FWidget::EWidgetMode FNobunanimBaseEditMode::ChangeToNextWidgetMode(FWidget::EWidgetMode CurWidgetMode)
+UE::Widget::EWidgetMode FNobunanimBaseEditMode::ChangeToNextWidgetMode(UE::Widget::EWidgetMode CurWidgetMode)
 {
 	UAnimGraphNode_SkeletalControlBase* SkelControl = Cast<UAnimGraphNode_SkeletalControlBase>(AnimNode);
 	if (SkelControl != nullptr)
 	{
 		PRAGMA_DISABLE_DEPRECATION_WARNINGS
-			return (FWidget::EWidgetMode)SkelControl->ChangeToNextWidgetMode(GetAnimPreviewScene().GetPreviewMeshComponent(), CurWidgetMode);
+			return (UE::Widget::EWidgetMode)SkelControl->ChangeToNextWidgetMode(GetAnimPreviewScene().GetPreviewMeshComponent(), CurWidgetMode);
 		PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	}
 
-	return FWidget::EWidgetMode::WM_None;
+	return UE::Widget::EWidgetMode::WM_None;
 }
 
-bool FNobunanimBaseEditMode::SetWidgetMode(FWidget::EWidgetMode InWidgetMode)
+bool FNobunanimBaseEditMode::SetWidgetMode(UE::Widget::EWidgetMode InWidgetMode)
 {
 	UAnimGraphNode_SkeletalControlBase* SkelControl = Cast<UAnimGraphNode_SkeletalControlBase>(AnimNode);
 	if (SkelControl != nullptr)
@@ -227,9 +227,9 @@ bool FNobunanimBaseEditMode::InputKey(FEditorViewportClient* InViewportClient, F
 	// Handle switching modes - only allowed when not already manipulating
 	if ((InEvent == IE_Pressed) && (InKey == EKeys::SpaceBar) && !bManipulating)
 	{
-		FWidget::EWidgetMode WidgetMode = (FWidget::EWidgetMode)ChangeToNextWidgetMode(GetModeManager()->GetWidgetMode());
+		UE::Widget::EWidgetMode WidgetMode = (UE::Widget::EWidgetMode)ChangeToNextWidgetMode(GetModeManager()->GetWidgetMode());
 		GetModeManager()->SetWidgetMode(WidgetMode);
-		if (WidgetMode == FWidget::WM_Scale)
+		if (WidgetMode == UE::Widget::WM_Scale)
 		{
 			GetModeManager()->SetCoordSystem(COORD_Local);
 		}
@@ -248,7 +248,7 @@ bool FNobunanimBaseEditMode::InputKey(FEditorViewportClient* InViewportClient, F
 bool FNobunanimBaseEditMode::InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale)
 {
 	const EAxisList::Type CurrentAxis = InViewportClient->GetCurrentWidgetAxis();
-	const FWidget::EWidgetMode WidgetMode = InViewportClient->GetWidgetMode();
+	const UE::Widget::EWidgetMode WidgetMode = InViewportClient->GetWidgetMode();
 
 	bool bHandled = false;
 
@@ -258,9 +258,9 @@ bool FNobunanimBaseEditMode::InputDelta(FEditorViewportClient* InViewportClient,
 	{
 		bHandled = true;
 
-		const bool bDoRotation = WidgetMode == FWidget::WM_Rotate || WidgetMode == FWidget::WM_TranslateRotateZ;
-		const bool bDoTranslation = WidgetMode == FWidget::WM_Translate || WidgetMode == FWidget::WM_TranslateRotateZ;
-		const bool bDoScale = WidgetMode == FWidget::WM_Scale;
+		const bool bDoRotation = WidgetMode == UE::Widget::WM_Rotate || WidgetMode == UE::Widget::WM_TranslateRotateZ;
+		const bool bDoTranslation = WidgetMode == UE::Widget::WM_Translate || WidgetMode == UE::Widget::WM_TranslateRotateZ;
+		const bool bDoScale = WidgetMode == UE::Widget::WM_Scale;
 
 		if (bDoRotation)
 		{
@@ -357,7 +357,7 @@ void FNobunanimBaseEditMode::Tick(FEditorViewportClient* ViewportClient, float D
 
 void FNobunanimBaseEditMode::ConvertToComponentSpaceTransform(const USkeletalMeshComponent* SkelComp, const FTransform & InTransform, FTransform & OutCSTransform, int32 BoneIndex, EBoneControlSpace Space)
 {
-	USkeleton* Skeleton = SkelComp->SkeletalMesh->Skeleton;
+	USkeleton* Skeleton = SkelComp->GetSkeletalMeshAsset()->GetSkeleton();
 
 	switch (Space)
 	{
@@ -381,7 +381,7 @@ void FNobunanimBaseEditMode::ConvertToComponentSpaceTransform(const USkeletalMes
 			const int32 ParentIndex = Skeleton->GetReferenceSkeleton().GetParentIndex(BoneIndex);
 			if (ParentIndex != INDEX_NONE)
 			{
-				const int32 MeshParentIndex = Skeleton->GetMeshBoneIndexFromSkeletonBoneIndex(SkelComp->SkeletalMesh, ParentIndex);
+				const int32 MeshParentIndex = Skeleton->GetMeshBoneIndexFromSkeletonBoneIndex(SkelComp->GetSkeletalMeshAsset(), ParentIndex);
 				if (MeshParentIndex != INDEX_NONE)
 				{
 					const FTransform ParentTM = SkelComp->GetBoneTransform(MeshParentIndex);
@@ -398,7 +398,7 @@ void FNobunanimBaseEditMode::ConvertToComponentSpaceTransform(const USkeletalMes
 	case BCS_BoneSpace:
 		if (BoneIndex != INDEX_NONE)
 		{
-			const int32 MeshBoneIndex = Skeleton->GetMeshBoneIndexFromSkeletonBoneIndex(SkelComp->SkeletalMesh, BoneIndex);
+			const int32 MeshBoneIndex = Skeleton->GetMeshBoneIndexFromSkeletonBoneIndex(SkelComp->GetSkeletalMeshAsset(), BoneIndex);
 			if (MeshBoneIndex != INDEX_NONE)
 			{
 				const FTransform BoneTM = SkelComp->GetBoneTransform(MeshBoneIndex);
@@ -412,7 +412,7 @@ void FNobunanimBaseEditMode::ConvertToComponentSpaceTransform(const USkeletalMes
 		break;
 
 	default:
-		if (SkelComp->SkeletalMesh)
+		if (SkelComp->GetSkeletalMeshAsset())
 		{
 			UE_LOG(LogAnimation, Warning, TEXT("ConvertToComponentSpaceTransform: Unknown BoneSpace %d  for Mesh: %s"), (uint8)Space, *SkelComp->SkeletalMesh->GetFName().ToString());
 		}
@@ -427,7 +427,7 @@ void FNobunanimBaseEditMode::ConvertToComponentSpaceTransform(const USkeletalMes
 
 void FNobunanimBaseEditMode::ConvertToBoneSpaceTransform(const USkeletalMeshComponent* SkelComp, const FTransform & InCSTransform, FTransform & OutBSTransform, int32 BoneIndex, EBoneControlSpace Space)
 {
-	USkeleton* Skeleton = SkelComp->SkeletalMesh->Skeleton;
+	USkeleton* Skeleton = SkelComp->GetSkeletalMeshAsset()->GetSkeleton();
 
 	switch (Space)
 	{
@@ -451,7 +451,7 @@ void FNobunanimBaseEditMode::ConvertToBoneSpaceTransform(const USkeletalMeshComp
 			const int32 ParentIndex = Skeleton->GetReferenceSkeleton().GetParentIndex(BoneIndex);
 			if (ParentIndex != INDEX_NONE)
 			{
-				const int32 MeshParentIndex = Skeleton->GetMeshBoneIndexFromSkeletonBoneIndex(SkelComp->SkeletalMesh, ParentIndex);
+				const int32 MeshParentIndex = Skeleton->GetMeshBoneIndexFromSkeletonBoneIndex(SkelComp->GetSkeletalMeshAsset(), ParentIndex);
 				if (MeshParentIndex != INDEX_NONE)
 				{
 					const FTransform ParentTM = SkelComp->GetBoneTransform(MeshParentIndex);
@@ -470,7 +470,7 @@ void FNobunanimBaseEditMode::ConvertToBoneSpaceTransform(const USkeletalMeshComp
 	{
 		if (BoneIndex != INDEX_NONE)
 		{
-			const int32 MeshBoneIndex = Skeleton->GetMeshBoneIndexFromSkeletonBoneIndex(SkelComp->SkeletalMesh, BoneIndex);
+			const int32 MeshBoneIndex = Skeleton->GetMeshBoneIndexFromSkeletonBoneIndex(SkelComp->GetSkeletalMeshAsset(), BoneIndex);
 			if (MeshBoneIndex != INDEX_NONE)
 			{
 				FTransform BoneCSTransform = SkelComp->GetBoneTransform(MeshBoneIndex);
@@ -691,7 +691,7 @@ FVector FNobunanimBaseEditMode::ConvertWidgetLocation(const USkeletalMeshCompone
 	{
 		if (InMeshBases.GetPose().IsValid())
 		{
-			USkeleton* Skeleton = InSkelComp->SkeletalMesh->Skeleton;
+			USkeleton* Skeleton = InSkelComp->GetSkeletalMeshAsset()->GetSkeleton();
 			const int32 MeshBoneIndex = InSkelComp->GetBoneIndex(InBoneName);
 			if (MeshBoneIndex != INDEX_NONE)
 			{

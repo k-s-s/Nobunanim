@@ -23,13 +23,14 @@ public class NobunanimEditor : ModuleRules
 
         PublicDependencyModuleNames.AddRange(new string[]
         {
-              "AnimGraph",
+              "AnimGraph","AnimationEditMode"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] 
         {
             "Core",
             "CoreUObject",
+            "EditorFramework",
             "Engine",
             "InputCore",
             "AnimGraph",

@@ -83,7 +83,7 @@ void UProceduralGaitControllerComponent::BeginPlay()
 	}
 
 	{
-		SetComponentTickEnabled(AnimInstanceRef);
+		SetComponentTickEnabled(IsValid(AnimInstanceRef));
 	}
 }
 
